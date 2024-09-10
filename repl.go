@@ -10,7 +10,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*Config) error
+	callback    func(*Config, ...string) error
 }
 
 func startRepl(cfg *Config) {
@@ -24,10 +24,14 @@ func startRepl(cfg *Config) {
 		}
 
 		commandName := words[0]
+		var action []string
+		if len(words) > 1 {
+			action = words[1:]
+		}
 
 		command, exists := getCommands()[commandName]
 		if exists {
-			err := command.callback(cfg)
+			err := command.callback(cfg, action...)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -45,22 +49,27 @@ func getCommands() map[string]cliCommand {
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
-			callback:    func(c *Config) error { return commandHelp(c) },
+			callback:    func(c *Config, a ...string) error { return commandHelp(c, a...) },
 		},
 		"exit": {
 			name:        "exit",
 			description: "Exit the Pokedex",
-			callback:    func(c *Config) error { return commandExit(c) },
+			callback:    func(c *Config, a ...string) error { return commandExit(c, a...) },
 		},
 		"map": {
 			name:        "map",
 			description: "Displays the names of 20 location areas in the pokemon world",
-			callback:    func(c *Config) error { return commandMap(c) },
+			callback:    func(c *Config, a ...string) error { return commandMap(c, a...) },
 		},
 		"mapb": {
 			name:        "mapb",
 			description: "Displays the previous 20 areas in the pokemon world",
-			callback:    func(c *Config) error { return commandMapb(c) },
+			callback:    func(c *Config, a ...string) error { return commandMapb(c, a...) },
+		},
+		"explore": {
+			name:        "explore <location_area>",
+			description: "Displays a list of all the pokemon in a given area",
+			callback:    func(c *Config, a ...string) error { return explore(c, a...) },
 		},
 	}
 }

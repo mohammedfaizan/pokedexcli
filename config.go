@@ -1,6 +1,9 @@
 package main
 
+import "github.com/mohammedfaizan/pokedexcli/internal/pokeapi"
+
 type Config struct {
-	Next     string
-	Previous string
+	pokeapiClient pokeapi.Client
+	Next          string
+	Previous      string
 }
