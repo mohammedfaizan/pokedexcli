@@ -108,3 +108,52 @@ func (c *Client) GetLocationArea(locationAreaName string) (LocationArea, error) 
 	return locationAreaResp, nil
 
 }
+
+func (c *Client) GetPokemonInfo(pokemonName string) (PokemonInfo, error) {
+
+	endpoint := "/pokemon/" + pokemonName
+	fullURL := baseUrl + endpoint
+
+	dat, ok := c.cache.Get(fullURL)
+	if ok {
+		fmt.Println("cache hit!!")
+		pokemonInfo := PokemonInfo{}
+		err := json.Unmarshal(dat, &pokemonInfo)
+		if err != nil {
+			return PokemonInfo{}, err
+		}
+		return pokemonInfo, nil
+	}
+	fmt.Println("cache miss!")
+
+	req, err := http.NewRequest("GET", fullURL, nil)
+	if err != nil {
+		return PokemonInfo{}, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return PokemonInfo{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode > 399 {
+		return PokemonInfo{}, fmt.Errorf("bad status code: %v", resp.StatusCode)
+	}
+
+	dat, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return PokemonInfo{}, err
+	}
+
+	pokemonInfoResp := PokemonInfo{}
+	err = json.Unmarshal(dat, &pokemonInfoResp)
+	if err != nil {
+		return PokemonInfo{}, err
+	}
+
+	c.cache.Add(fullURL, dat)
+
+	return pokemonInfoResp, nil
+
+}

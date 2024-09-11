@@ -16,7 +16,7 @@ type cliCommand struct {
 func startRepl(cfg *Config) {
 	reader := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Println("pokedex > ")
+		fmt.Printf("pokedex > ")
 		reader.Scan()
 		words := cleanInput(reader.Text())
 		if len(words) == 0 {
@@ -30,7 +30,8 @@ func startRepl(cfg *Config) {
 		}
 
 		command, exists := getCommands()[commandName]
-		if exists {
+
+		if exists && len(words) > 1 {
 			err := command.callback(cfg, action...)
 			if err != nil {
 				fmt.Println(err)
@@ -49,27 +50,42 @@ func getCommands() map[string]cliCommand {
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
-			callback:    func(c *Config, a ...string) error { return commandHelp(c, a...) },
+			callback:    commandHelp,
 		},
 		"exit": {
 			name:        "exit",
 			description: "Exit the Pokedex",
-			callback:    func(c *Config, a ...string) error { return commandExit(c, a...) },
+			callback:    commandExit,
 		},
 		"map": {
 			name:        "map",
 			description: "Displays the names of 20 location areas in the pokemon world",
-			callback:    func(c *Config, a ...string) error { return commandMap(c, a...) },
+			callback:    commandMap,
 		},
 		"mapb": {
 			name:        "mapb",
 			description: "Displays the previous 20 areas in the pokemon world",
-			callback:    func(c *Config, a ...string) error { return commandMapb(c, a...) },
+			callback:    commandMapb,
 		},
 		"explore": {
 			name:        "explore <location_area>",
 			description: "Displays a list of all the pokemon in a given area",
-			callback:    func(c *Config, a ...string) error { return explore(c, a...) },
+			callback:    explore,
+		},
+		"catch": {
+			name:        "catch <pokemon_name>",
+			description: "a command to catch a pokemon",
+			callback:    catch,
+		},
+		"inspect": {
+			name:        "inspect <pokemon_name>",
+			description: "a command to display stats of a caught pokemon",
+			callback:    inspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "a command to display display all the caught pokemon",
+			callback:    pokedex,
 		},
 	}
 }
